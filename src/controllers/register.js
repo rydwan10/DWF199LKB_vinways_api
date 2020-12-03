@@ -1,4 +1,4 @@
-const { Register } = require("../../models");
+const { User } = require("../../models");
 
 // ! WARNING this controller should has a Token later
 exports.register = async (req, res) => {
@@ -19,7 +19,7 @@ exports.register = async (req, res) => {
       });
     }
 
-    const newUser = await Register.create(data);
+    const newUser = await User.create(data);
 
     res.status(201).send({
       status: "success",
