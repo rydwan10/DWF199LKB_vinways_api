@@ -139,7 +139,7 @@ exports.deleteArtistById = async (req, res) => {
 
     res.status(200).send({
       status: "success",
-      message: "Artist successfully deleted!",
+      message: `Artist with id: ${id} successfully deleted!`,
       data: {
         deletedArtist: artist,
       },
@@ -189,7 +189,7 @@ exports.updateArtistById = async (req, res) => {
 
     res.status(200).send({
       status: "success",
-      message: "Artist successfully updated!",
+      message: `Artist with id: ${id} successfully updated!`,
       data: {
         updatedArtistData: updatedArtist,
         oldArtistData: artist,
