@@ -10,8 +10,10 @@ const {
   updateArtistById,
 } = require("../controllers/artist");
 
+const { uploadImage } = require("../middlewares/uploadImage");
+
 router.get("/artists", getArtist);
-router.post("/artists", addArtist);
+router.post("/artists", uploadImage("thumbnail"), addArtist);
 router.get("/artists/:id", getArtistById);
 router.delete("/artists/:id", deleteArtistById);
 router.patch("/artists/:id", updateArtistById);
