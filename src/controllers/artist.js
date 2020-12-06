@@ -166,10 +166,12 @@ exports.deleteArtistById = async (req, res) => {
 };
 
 exports.updateArtistById = async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
-
   try {
+    const { id } = req.params;
+    const { body, file } = req;
+
+    // const thumbnail = file.filename;
+
     const artist = await Artist.findOne({
       where: {
         id,
@@ -185,6 +187,19 @@ exports.updateArtistById = async (req, res) => {
         },
       });
     }
+
+    let thumbnail;
+    // console.log(Object.keys(file).length);
+    if (!file) {
+      thumbnail = artist.thumbnail;
+    } else {
+      thumbnail = file.filename;
+    }
+
+    const data = {
+      ...body,
+      thumbnail,
+    };
 
     await Artist.update(data, {
       where: {
