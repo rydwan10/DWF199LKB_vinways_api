@@ -1,4 +1,5 @@
 const { Music, Artist } = require("../../models");
+const Joi = require("joi");
 
 exports.getMusics = async (req, res) => {
   try {
@@ -91,25 +92,36 @@ exports.getMusicById = async (req, res) => {
 
 //! Attention below are the controllers that must have authorization header later!
 exports.addMusic = async (req, res) => {
-  // TODO for attachment is using multer later on. For now let's using string as it's thumbnail
-  const data = req.body;
   try {
-    // jika objek data tidak memiliki key dan jika objek data kurang dari 5 fields
-    if (
-      data === undefined ||
-      Object.keys(data).length === 0 ||
-      Object.keys(data).length < 5
-    ) {
+    const { body, files } = req;
+    const thumbnailName = files.thumbnail[0].filename;
+    const attachmentName = files.attachment[0].filename;
+
+    const validationSchema = Joi.object({
+      title: Joi.string().required(),
+      year: Joi.date().required(),
+      // thumbnail: Joi.string().required(),
+      // attachment: Joi.string().required(),
+      artistId: Joi.string().required(),
+    });
+
+    const { error } = validationSchema.validate(body, { abortEarly: false });
+
+    if (error) {
       return res.status(400).send({
-        status: "Bad Request",
-        message: `You must fill all the fields! (title, year, artistId, thumbnail, attachment)`,
+        status: "Validation Error",
+        message: error.details.map((error) => error.message),
         data: {
           artist: null,
         },
       });
     }
 
-    const newMusic = await Music.create(data);
+    const newMusic = await Music.create({
+      ...body,
+      thumbnail: thumbnailName,
+      attachment: attachmentName,
+    });
 
     res.status(201).send({
       status: "success",
@@ -171,10 +183,10 @@ exports.deleteMusicById = async (req, res) => {
 };
 
 exports.updateMusicById = async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
-
   try {
+    const { id } = req.params;
+    const { body, files } = req;
+
     const music = await Music.findOne({
       where: {
         id,
@@ -190,6 +202,58 @@ exports.updateMusicById = async (req, res) => {
         },
       });
     }
+
+    let thumbnailName;
+    let attachmentName;
+
+    if (Object.keys(files) == 0) {
+      thumbnailName = music.thumbnail;
+      attachmentName = music.attachment;
+    } else if (
+      Object.keys(files).length == 1 &&
+      Object.keys(files)[0] == "thumbnail"
+    ) {
+      thumbnailName = files.thumbnail[0].filename;
+      attachmentName = music.attachment;
+    } else if (
+      Object.keys(files).length == 1 &&
+      Object.keys(files)[0] == "attachment"
+    ) {
+      attachmentName = files.attachment[0].filename;
+      thumbnailName = music.thumbnail;
+    } else if (
+      Object.keys(files)[0] == "thumbnail" &&
+      Object.keys(files)[1] == "attachment"
+    ) {
+      thumbnailName = files.thumbnail[0].filename;
+      attachmentName = files.attachment[0].filename;
+    }
+
+    const validationSchema = Joi.object({
+      title: Joi.string(),
+      year: Joi.date(),
+      // thumbnail: Joi.string().required(),
+      // attachment: Joi.string().required(),
+      artistId: Joi.string(),
+    });
+
+    const { error } = validationSchema.validate(body, { abortEarly: false });
+
+    if (error) {
+      return res.status(400).send({
+        status: "Validation Error",
+        message: error.details.map((error) => error.message),
+        data: {
+          artist: null,
+        },
+      });
+    }
+
+    const data = {
+      ...body,
+      attachment: attachmentName,
+      thumbnail: thumbnailName,
+    };
 
     await Music.update(data, {
       where: {
