@@ -170,8 +170,6 @@ exports.updateArtistById = async (req, res) => {
     const { id } = req.params;
     const { body, file } = req;
 
-    // const thumbnail = file.filename;
-
     const artist = await Artist.findOne({
       where: {
         id,
@@ -189,7 +187,6 @@ exports.updateArtistById = async (req, res) => {
     }
 
     let thumbnail;
-    // console.log(Object.keys(file).length);
     if (!file) {
       thumbnail = artist.thumbnail;
     } else {
@@ -200,6 +197,24 @@ exports.updateArtistById = async (req, res) => {
       ...body,
       thumbnail,
     };
+
+    const validationSchema = Joi.object({
+      name: Joi.string(),
+      old: Joi.string(),
+      category: Joi.string(),
+      startCareer: Joi.date(),
+      thumbnail: Joi.string(),
+    });
+
+    const { error } = validationSchema.validate(data, { abortEarly: false });
+    if (error) {
+      return res.status(400).send({
+        status: "Validation Error",
+        error: {
+          message: error.details.map((error) => error.message),
+        },
+      });
+    }
 
     await Artist.update(data, {
       where: {
