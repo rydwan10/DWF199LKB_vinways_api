@@ -1,3 +1,4 @@
+const Joi = require("joi");
 const { Artist } = require("../../models");
 
 exports.getArtist = async (req, res) => {
@@ -76,19 +77,29 @@ exports.getArtistById = async (req, res) => {
 
 //! Attention below are the controllers that must have authorization header later!
 exports.addArtist = async (req, res) => {
-  const data = req.body;
   try {
-    // jika objek data tidak memiliki key dan jika objek data kurang dari 5 fields
-    if (
-      data === undefined ||
-      Object.keys(data).length === 0 ||
-      Object.keys(data).length < 5
-    ) {
+    const { body, file } = req;
+    const thumbnail = file.filename;
+
+    const data = {
+      ...body,
+      thumbnail,
+    };
+
+    const validationSchema = Joi.object({
+      name: Joi.string().required(),
+      old: Joi.string().required(),
+      category: Joi.string().required(),
+      startCareer: Joi.date().required(),
+      thumbnail: Joi.string().required(),
+    });
+
+    const { error } = validationSchema.validate(data, { abortEarly: false });
+    if (error) {
       return res.status(400).send({
-        status: "Bad Request",
-        message: `You must fill all the fields! (name, old, category, startCareer, thumbnail)`,
-        data: {
-          artist: null,
+        status: "Validation Error",
+        error: {
+          message: error.details.map((error) => error.message),
         },
       });
     }
@@ -155,10 +166,10 @@ exports.deleteArtistById = async (req, res) => {
 };
 
 exports.updateArtistById = async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
-
   try {
+    const { id } = req.params;
+    const { body, file } = req;
+
     const artist = await Artist.findOne({
       where: {
         id,
@@ -171,6 +182,36 @@ exports.updateArtistById = async (req, res) => {
         message: `Artist with id: ${id} is not found!`,
         data: {
           artist: null,
+        },
+      });
+    }
+
+    let thumbnail;
+    if (!file) {
+      thumbnail = artist.thumbnail;
+    } else {
+      thumbnail = file.filename;
+    }
+
+    const data = {
+      ...body,
+      thumbnail,
+    };
+
+    const validationSchema = Joi.object({
+      name: Joi.string(),
+      old: Joi.string(),
+      category: Joi.string(),
+      startCareer: Joi.date(),
+      thumbnail: Joi.string(),
+    });
+
+    const { error } = validationSchema.validate(data, { abortEarly: false });
+    if (error) {
+      return res.status(400).send({
+        status: "Validation Error",
+        error: {
+          message: error.details.map((error) => error.message),
         },
       });
     }
