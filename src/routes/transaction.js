@@ -12,11 +12,19 @@ const {
 
 // middleware
 const { uploadImage } = require("../middlewares/uploadImage");
+const { auth } = require("../middlewares/auth");
+const { isAdmin } = require("../middlewares/isAdmin");
 
-router.get("/transactions", getTransactions);
-router.post("/transactions", uploadImage("proofOfTransaction"), addTransaction);
-router.get("/transactions/:id", getTransactionById);
-router.patch("/transactions/:id", updateTransaction);
-router.delete("/transactions/:id", deleteTransaction);
+router.get("/transactions", auth, isAdmin, getTransactions);
+router.post(
+  "/transactions",
+  auth,
+  isAdmin,
+  uploadImage("proofOfTransaction"),
+  addTransaction
+);
+router.get("/transactions/:id", auth, isAdmin, getTransactionById);
+router.patch("/transactions/:id", auth, isAdmin, updateTransaction);
+router.delete("/transactions/:id", auth, isAdmin, deleteTransaction);
 
 module.exports = router;
