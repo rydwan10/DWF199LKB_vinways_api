@@ -19,11 +19,10 @@ router.get("/transactions", auth, isAdmin, getTransactions);
 router.post(
   "/transactions",
   auth,
-  isAdmin,
   uploadImage("proofOfTransaction"),
   addTransaction
 );
-router.get("/transactions/:id", auth, isAdmin, getTransactionById);
+router.get("/transactions/:id", auth, getTransactionById);
 router.patch("/transactions/:id", auth, isAdmin, updateTransaction);
 router.delete("/transactions/:id", auth, isAdmin, deleteTransaction);
 

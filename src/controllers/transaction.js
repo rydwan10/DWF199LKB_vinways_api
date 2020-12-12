@@ -13,7 +13,7 @@ exports.getTransactions = async (req, res) => {
         model: User,
         as: "user",
         attributes: {
-          exclude: ["createdAt", "updatedAt"],
+          exclude: ["createdAt", "updatedAt", "password"],
         },
       },
     });
@@ -59,7 +59,7 @@ exports.getTransactionById = async (req, res) => {
         model: User,
         as: "user",
         attributes: {
-          exclude: ["createdAt", "updatedAt"],
+          exclude: ["createdAt", "updatedAt", "password"],
         },
       },
     });
@@ -99,6 +99,7 @@ exports.addTransaction = async (req, res) => {
 
     const validationSchema = Joi.object({
       userId: Joi.string().required(),
+      accountNumber: Joi.string().required(),
     });
 
     const { error } = validationSchema.validate(body, { abortEarly: false });
@@ -111,10 +112,12 @@ exports.addTransaction = async (req, res) => {
         },
       });
     }
+    const { accountNumber } = req.body;
 
     const payment = await Transaction.create({
       ...body,
       proofOfTransaction: proofOfTransaction,
+      accountNumber: accountNumber,
       remainingActive: 0,
       paymentStatus: "pending",
     });
@@ -151,7 +154,7 @@ exports.updateTransaction = async (req, res) => {
         model: User,
         as: "user",
         attributes: {
-          exclude: ["createdAt", "updatedAt"],
+          exclude: ["createdAt", "updatedAt", "password"],
         },
       },
     });
@@ -200,7 +203,7 @@ exports.updateTransaction = async (req, res) => {
         model: User,
         as: "user",
         attributes: {
-          exclude: ["createdAt", "updatedAt"],
+          exclude: ["createdAt", "updatedAt", "password"],
         },
       },
     });

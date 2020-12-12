@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       proofOfTransaction: DataTypes.STRING,
       remainingActive: DataTypes.INTEGER,
       paymentStatus: DataTypes.STRING,
+      accountNumber: DataTypes.STRING,
     },
     {
       sequelize,

@@ -61,8 +61,11 @@ exports.register = async (req, res) => {
       status: "success",
       message: "User successfully registered!",
       data: {
-        fullName: user.fullName,
+        id: user.id,
+        name: user.fullName,
         email: user.email,
+        role: user.role,
+        status: user.status,
         token,
       },
     });
@@ -135,10 +138,42 @@ exports.login = async (req, res) => {
       status: "success",
       message: "Successfully Login",
       data: {
-        name: user.name,
+        id: user.id,
+        name: user.fullName,
         email: user.email,
         role: user.role,
+        status: user.status,
         token,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      error: {
+        message: "Server Error",
+      },
+    });
+  }
+};
+
+exports.checkAuth = async (req, res) => {
+  try {
+    const userId = req.userId.id;
+    const user = await User.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    res.send({
+      status: "success",
+      message: "Token Valid",
+      data: {
+        id: user.id,
+        name: user.fullName,
+        email: user.email,
+        role: user.role,
+        status: user.status,
       },
     });
   } catch (err) {

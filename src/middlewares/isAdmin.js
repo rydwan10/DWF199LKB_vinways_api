@@ -9,7 +9,6 @@ exports.isAdmin = async (req, res, next) => {
         id,
       },
     });
-    console.log(adminUser);
 
     if (adminUser.role == "admin") {
       next();
@@ -17,7 +16,7 @@ exports.isAdmin = async (req, res, next) => {
       res.status(401).send({
         status: "Not Allowed",
         error: {
-          message: "You're not allowed to enter this route",
+          message: "You're not allowed to do this action",
         },
       });
     }
